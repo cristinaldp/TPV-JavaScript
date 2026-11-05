@@ -1,0 +1,182 @@
+/* estilos.css — TPV de la frutería
+   Los colores y el tamaño del texto del ticket están en variables,
+   para poder cambiarlos desde JavaScript. */
+:root {
+  --fondo: #f6f7f2;
+  --superficie: #ffffff;
+  --texto: #222222;
+  --acento: #4d6b12;
+  --aviso: #b24700;
+  --borde: #cfd8c0;
+  --tam-ticket: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+.cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+  background: var(--acento);
+  color: #ffffff;
+}
+
+.cabecera h1 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.tpv {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+h2 {
+  margin-top: 0;
+  color: var(--acento);
+}
+
+/* --- Catálogo --- */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.filtros button.activo {
+  background: var(--acento);
+  color: #ffffff;
+}
+
+.productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.8rem;
+}
+
+.tarjeta {
+  background: var(--superficie);
+  border: 2px solid var(--borde);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+}
+
+.tarjeta h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+}
+
+.tarjeta p {
+  margin: 0.15rem 0;
+  font-size: 0.9rem;
+}
+
+.tarjeta .botones {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+
+/* Estados de una tarjeta */
+.tarjeta.pocas {
+  border-color: var(--aviso);
+}
+
+.tarjeta.agotado {
+  opacity: 0.45;
+}
+
+.tarjeta .etiqueta-oferta {
+  display: inline-block;
+  background: var(--aviso);
+  color: #ffffff;
+  font-size: 0.75rem;
+  padding: 0 0.4rem;
+  border-radius: 4px;
+}
+
+.detalle {
+  min-height: 1.4rem;
+  font-style: italic;
+}
+
+/* --- Ticket --- */
+.ticket {
+  background: var(--superficie);
+  border: 2px solid var(--borde);
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: var(--tam-ticket);
+  align-self: start;
+}
+
+.lineas {
+  list-style: none;
+  padding: 0;
+}
+
+.lineas li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed var(--borde);
+}
+
+.lineas li.reciente {
+  background: #eef4e1;
+}
+
+.total {
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.aviso {
+  color: var(--aviso);
+  min-height: 1.2rem;
+}
+
+/* --- Gestión de productos --- */
+.gestion {
+  margin: 0 1.5rem 1.5rem;
+  background: var(--superficie);
+  border: 2px solid var(--borde);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.gestion label {
+  display: block;
+  margin: 0.4rem 0 0.1rem;
+}
+
+.invalido {
+  border: 2px solid var(--aviso);
+}
+
+.error {
+  display: block;
+  color: var(--aviso);
+  font-size: 0.85rem;
+  min-height: 1rem;
+}
+
+.ventas {
+  margin: 0 1.5rem 1.5rem;
+}

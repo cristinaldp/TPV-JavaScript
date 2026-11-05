@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TPV · Frutería La Huerta</title>
+  <link rel="stylesheet" href="estilos.css">
+  <!-- PASO 1: enlazar aquí datos.js y app.js, los dos con defer y en ese orden -->
+  <script src="datos.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="cabecera">
+    <h1>Frutería La Huerta · TPV</h1>
+  </header>
+
+  <main class="tpv">
+    <section class="catalogo">
+      <h2>Productos</h2>
+      <div class="productos"></div>
+    </section>
+
+    <aside class="ticket">
+      <h2>Ticket</h2>
+      <form class="venta-codigo">
+        <label>Código <input class="codigo" type="number"></label>
+        <button>Añadir</button>
+      </form>
+      <p class="aviso"></p>
+      <ul class="lineas"></ul>
+      <p class="total">Total: 0.00 €</p>
+      <button class="vaciar">Vaciar ticket</button>
+    </aside>
+  </main>
+</body>
+</html>
