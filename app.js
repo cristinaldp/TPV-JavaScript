@@ -84,38 +84,42 @@ function pintarTicket(){
     console.log(`Ticket: ${lineas.length} línea(s), total ${totalPrecio.toFixed(2)} €`);
 }
 
+function anadirAlTicket(id) {
+    const producto = buscarProducto(id);
+
+    if (producto === null) {
+        return `No existe el código ${id}`;
+    }
+
+    const linea = buscarLinea(id);
+
+    if (linea !== null && linea.cantidad >= producto.stock + linea.cantidad) {
+        return `${producto.nombre}: solo hay ${linea.cantidad}`;
+    }
+
+    if (producto.stock === 0) {
+        return `${producto.nombre}: agotado`;
+    }
+
+    if (linea !== null) {
+        linea.cantidad++;
+    } else {
+        lineas.push(new LineaTicket(producto, 1));
+    }
+
+    producto.stock--;
+
+    return "";
+}
+
 function venderPorCodigo(event) {
     event.preventDefault();
 
     const id = Number(codigo.value);
-    const producto = buscarProducto(id);
+    
+    aviso.textContent = anadirAlTicket(id);
 
-    if (producto === null) {
-        aviso.textContent = `No existe el código ${id}`;
-        console.log(aviso.textContent);
-    } else {
-        const linea = buscarLinea(id);
-
-        if (producto.stock === 0) {
-            aviso.textContent = `${producto.nombre}: agotado`;
-            console.log(aviso.textContent);
-
-        } else if (linea !== null && linea.cantidad >= producto.stock) {
-            aviso.textContent = `${producto.nombre}: solo hay ${producto.stock}`;
-            console.log(aviso.textContent);
-
-        } else {
-            if (linea !== null) {
-                linea.cantidad++;
-                producto.stock -=1;
-            } else {
-                lineas.push(new LineaTicket(producto, 1));
-                producto.stock -=1;
-            }
-
-            aviso.textContent = "";
-        }
-    }
+    
     pintarCatalogo();
     pintarTicket();
     codigo.value = "";
