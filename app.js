@@ -107,14 +107,16 @@ function venderPorCodigo(event) {
         } else {
             if (linea !== null) {
                 linea.cantidad++;
+                producto.stock -=1;
             } else {
                 lineas.push(new LineaTicket(producto, 1));
+                producto.stock -=1;
             }
 
             aviso.textContent = "";
         }
     }
-
+    pintarCatalogo();
     pintarTicket();
     codigo.value = "";
     codigo.focus();
@@ -126,6 +128,5 @@ function vaciarTicket(){
     lineas = [];
     pintarTicket();
 }
-
 
 vaciar.addEventListener("click", vaciarTicket);
