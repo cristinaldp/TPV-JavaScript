@@ -33,6 +33,14 @@ function crearTarjetaProducto(producto) {
   const stock = document.createElement("p");
   stock.textContent = `Stock: ${producto.stock}`;
   tarjeta.append(nombre, codigo, precio, stock);
+  const contenedor = document.createElement("div");
+  contenedor.classList.add("botones");
+  const boton = document.createElement("button");
+  boton.classList.add("anadir");
+  boton.textContent="Añadir";
+  contenedor.append(boton);
+  tarjeta.append(contenedor);
+
   return tarjeta;
 }
 
@@ -47,6 +55,46 @@ function pintarCatalogo(){
 }
 
 pintarCatalogo();
+
+catalogo.addEventListener("click", (event)=>{
+
+    const tarjetaElegida = event.target.closest(".tarjeta");
+
+    if (tarjetaElegida === null) return; // clic en un hueco
+
+    const id = Number(tarjetaElegida.dataset.id);// dataset devuelve texto
+
+    if (event.target.closest(".anadir") !== null) {
+        // anadirAlTicket(id), escribir el aviso y pintarTicket()
+        aviso.textContent = anadirAlTicket(id);
+        pintarCatalogo();
+        pintarTicket();
+    }
+  });
+
+function crearLineaTicket(linea){
+
+    const elemento = document.createElement("li");
+    elemento.dataset.id = linea.producto.id;
+
+    const texto = document.createElement("span");
+    texto.textContent = `${linea.producto.nombre} x ${linea.cantidad} · ${(linea.producto.precio * linea.cantidad).toFixed(2)} €`;
+
+    const botones = document.createElement("span");
+    const mas = document.createElement("button");
+    mas.textContent = "+";
+    mas.dataset.accion = "mas";
+    const menos = document.createElement("button");
+    menos.textContent = "-";
+    menos.dataset.accion = "menos";
+    const quitar = document.createElement("button");
+    quitar.textContent = "quitar";
+    quitar.dataset.accion = "quitar";
+    botones.append(mas, menos, quitar);
+
+    elemento.append(texto, botones);
+    return elemento;
+}
 
 function buscarProducto(id){
     for (let producto of productos){
