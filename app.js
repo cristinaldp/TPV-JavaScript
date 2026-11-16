@@ -178,6 +178,7 @@ ventaCodigo.addEventListener("submit", venderPorCodigo);
 
 function vaciarTicket(){
     lineas = [];
+    aviso.textContent = "";
     pintarTicket();
 }
 
