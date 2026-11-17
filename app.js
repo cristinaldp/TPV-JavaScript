@@ -20,7 +20,71 @@ const total = document.querySelector(".total");
 const vaciar = document.querySelector(".vaciar");
 const detalle = document.querySelector(".detalle");
 const pagina = document.querySelector("body");
+const contenedorFiltros = document.querySelector(".filtros");
+const botonesFiltro = contenedorFiltros.querySelectorAll("button");
+const ventas = [];
+const btnCobrar = document.querySelector(".cobrar");
+const resumenVentas = document.querySelector(".resumen-ventas");
 let ultimoId = null;
+let categoriaActual = "todas";
+let siguienteTicket = 1;
+
+function cumpleFiltro(producto){
+    if(producto.categoria === categoriaActual){
+        return true;
+    } else if (categoriaActual === "todas"){
+        return true;
+    } else{
+        return false;
+    }
+}
+
+function cobrar(){
+
+    const total = totalTicket();
+
+    ventas.push({ numero: siguienteTicket, total: total, lineas: lineas.length });
+    console.log(`Cobrado ticket ${siguienteTicket}: ${total.toFixed(2)} €`);
+    siguienteTicket++;
+
+    resumenVentas.textContent = `Tickets: ${ventas.length} · Recaudado: ${recaudacion().toFixed(2)} € · Ticket medio: ${media().toFixed(2)} €`;
+
+    lineas = [];
+    ultimoId = null;
+    pintarCatalogo();
+    pintarTicket();
+}
+
+function recaudacion(){
+    let total = 0;
+    for(let venta of ventas){
+        total += venta.total;
+    }
+
+    return total;
+}
+
+function media(){
+
+    let suma = 0;
+    for(let venta of ventas){
+        suma += venta.total;
+    }
+
+    return suma/ventas.length;
+}
+
+btnCobrar.addEventListener("click", cobrar);
+
+function totalTicket(){
+    let totalPrecio = 0;
+    for (let linea of lineas){
+
+        totalPrecio += linea.producto.precio * linea.cantidad;
+    }
+
+    return totalPrecio;
+}
 
 function crearTarjetaProducto(producto) {
   const tarjeta = document.createElement("article");
@@ -57,10 +121,28 @@ function pintarCatalogo(){
     catalogo.replaceChildren();
 
     for (let producto of productos){
+        if(!cumpleFiltro(producto)) continue;
+
         let tarjeta = crearTarjetaProducto(producto);
         catalogo.append(tarjeta);
     }
+
+    for (const boton of botonesFiltro) {
+
+        boton.classList.toggle("activo", boton.dataset.categoria === categoriaActual);
+    }
 }
+
+contenedorFiltros.addEventListener("click", (event)=>{
+    const boton = event.target.closest("button");
+
+    if(boton === null) return;
+
+    categoriaActual = boton.dataset.categoria;
+
+    console.log(`Filtro: ${boton.dataset.categoria}`);
+    pintarCatalogo();
+});
 
 pintarCatalogo();
 
@@ -204,18 +286,18 @@ pintarTicket();
 function pintarTicket(){
 
     vaciar.disabled = lineas.length === 0;
-    listaLineas.replaceChildren();
-    let totalPrecio = 0;
-    for (let linea of lineas){
+    btnCobrar.disabled = lineas.length === 0;
 
+    listaLineas.replaceChildren();
+
+    for (let linea of lineas){
         const lineaTicket = crearLineaTicket(linea);
 
         listaLineas.append(lineaTicket);
-        totalPrecio += linea.producto.precio * linea.cantidad;
     }
 
-    total.textContent = `Total: ${totalPrecio.toFixed(2)} €`;
-    console.log(`Ticket: ${lineas.length} línea(s), total ${totalPrecio.toFixed(2)} €`);
+    total.textContent = `Total: ${totalTicket().toFixed(2)} €`;
+    console.log(`Ticket: ${lineas.length} línea(s), total ${totalTicket().toFixed(2)} €`);
 }
 
 function anadirAlTicket(id) {
@@ -265,8 +347,15 @@ function venderPorCodigo(event) {
 ventaCodigo.addEventListener("submit", venderPorCodigo);
 
 function vaciarTicket(){
+
+    for (const linea of lineas) {
+        linea.producto.stock += linea.cantidad;
+    }
+    
     lineas = [];
     aviso.textContent = "";
+
+    pintarCatalogo();
     pintarTicket();
 }
 

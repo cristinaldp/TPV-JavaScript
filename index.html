@@ -17,6 +17,13 @@
   <main class="tpv">
     <section class="catalogo">
       <h2>Productos</h2>
+      <div class="filtros">
+        <button data-categoria="todas" class="activo">Todas</button>
+        <button data-categoria="fruta">Fruta</button>
+        <button data-categoria="verdura">Verdura</button>
+        <button data-categoria="frutos secos">Frutos secos</button>
+        <input class="buscar" placeholder="Buscar por nombre">
+      </div>
       <p class="detalle">Click en un producto para ver su detalle</p>
       <div class="productos"></div>
     </section>
@@ -30,8 +37,13 @@
       <p class="aviso"></p>
       <ul class="lineas"></ul>
       <p class="total">Total: 0.00 €</p>
+      <button class="cobrar">Cobrar</button>
       <button class="vaciar">Vaciar ticket</button>
     </aside>
   </main>
+  <section class="ventas">
+    <h2>Ventas del día</h2>
+    <p class="resumen-ventas">Sin ventas todavía</p>
+  </section>
 </body>
 </html>
