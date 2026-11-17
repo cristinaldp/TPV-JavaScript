@@ -74,10 +74,9 @@ catalogo.addEventListener("click", (event)=>{
 });
 
 pagina.addEventListener("keydown", (event)=>{
-    const tecla = event.key === "Escape";
 
-    if(tecla !== null){
-        codigo.textContent = "";
+    if(event.key === "Escape"){
+        codigo.value = "";
         aviso.textContent = "";
         console.log("Escape: código y aviso borrados");
     }
@@ -147,9 +146,13 @@ listaLineas.addEventListener("click", (event)=>{
         if (linea.producto.stock > 0){
             linea.cantidad++;
             linea.producto.stock--;
+        } else {
+            aviso.textContent = `${linea.producto.nombre}: solo hay ${linea.cantidad}`;
         }
         
     } else if (botonElegido.dataset.accion === "menos"){
+
+        aviso.textContent = "";
 
         if (linea.cantidad > 1){
             linea.cantidad--;
@@ -160,6 +163,7 @@ listaLineas.addEventListener("click", (event)=>{
         
     } else{
         quitarLinea(id);
+        aviso.textContent = "";
     }
 
     pintarCatalogo();
