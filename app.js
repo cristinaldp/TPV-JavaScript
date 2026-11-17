@@ -25,18 +25,24 @@ const botonesFiltro = contenedorFiltros.querySelectorAll("button");
 const ventas = [];
 const btnCobrar = document.querySelector(".cobrar");
 const resumenVentas = document.querySelector(".resumen-ventas");
+const campo = document.querySelector(".buscar");
 let ultimoId = null;
 let categoriaActual = "todas";
 let siguienteTicket = 1;
 
 function cumpleFiltro(producto){
-    if(producto.categoria === categoriaActual){
+
+    const coincideCategoria = categoriaActual === "todas" ||
+                          producto.categoria === categoriaActual;
+
+    const coincideNombre = producto.nombre.toLowerCase()
+                           .includes(campo.value.trim().toLowerCase());
+
+    if(coincideCategoria && coincideNombre){
         return true;
-    } else if (categoriaActual === "todas"){
-        return true;
-    } else{
-        return false;
     }
+
+    return false;
 }
 
 function cobrar(){
@@ -360,3 +366,7 @@ function vaciarTicket(){
 }
 
 vaciar.addEventListener("click", vaciarTicket);
+
+campo.addEventListener("input", (event)=>{
+    pintarCatalogo();
+});
