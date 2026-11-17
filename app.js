@@ -20,6 +20,7 @@ const total = document.querySelector(".total");
 const vaciar = document.querySelector(".vaciar");
 const detalle = document.querySelector(".detalle");
 const pagina = document.querySelector("body");
+let ultimoId = null;
 
 function crearTarjetaProducto(producto) {
   const tarjeta = document.createElement("article");
@@ -42,6 +43,11 @@ function crearTarjetaProducto(producto) {
   boton.textContent="Añadir";
   contenedor.append(boton);
   tarjeta.append(contenedor);
+
+  tarjeta.classList.toggle("pocas", producto.stock > 0 && producto.stock <= 3);
+
+  tarjeta.classList.toggle("agotado", producto.stock === 0);
+  boton.disabled = producto.stock === 0;
 
   return tarjeta;
 }
@@ -104,6 +110,8 @@ function crearLineaTicket(linea){
     const elemento = document.createElement("li");
     elemento.dataset.id = linea.producto.id;
 
+    elemento.classList.toggle("reciente", ultimoId === linea.producto.id);
+
     const texto = document.createElement("span");
     texto.textContent = `${linea.producto.nombre} x ${linea.cantidad} · ${(linea.producto.precio * linea.cantidad).toFixed(2)} €`;
 
@@ -146,6 +154,7 @@ listaLineas.addEventListener("click", (event)=>{
         if (linea.producto.stock > 0){
             linea.cantidad++;
             linea.producto.stock--;
+            ultimoId = linea.producto.id;
         } else {
             aviso.textContent = `${linea.producto.nombre}: solo hay ${linea.cantidad}`;
         }
@@ -157,6 +166,7 @@ listaLineas.addEventListener("click", (event)=>{
         if (linea.cantidad > 1){
             linea.cantidad--;
             linea.producto.stock++;
+            ultimoId = linea.producto.id;
         } else if(linea.cantidad === 1){
             quitarLinea(id);
         }
@@ -227,8 +237,10 @@ function anadirAlTicket(id) {
 
     if (linea !== null) {
         linea.cantidad++;
+        ultimoId = id;
     } else {
         lineas.push(new LineaTicket(producto, 1));
+        ultimoId = id;
     }
 
     producto.stock--;
