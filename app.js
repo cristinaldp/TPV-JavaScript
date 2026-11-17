@@ -18,6 +18,8 @@ class LineaTicket {
 }
 const total = document.querySelector(".total");
 const vaciar = document.querySelector(".vaciar");
+const detalle = document.querySelector(".detalle");
+const pagina = document.querySelector("body");
 
 function crearTarjetaProducto(producto) {
   const tarjeta = document.createElement("article");
@@ -55,6 +57,32 @@ function pintarCatalogo(){
 }
 
 pintarCatalogo();
+
+catalogo.addEventListener("click", (event)=>{
+     const tarjetaElegida = event.target.closest(".tarjeta");
+     const botonAnadir = event.target.closest(".anadir");
+
+     if (tarjetaElegida === null || botonAnadir !== null){
+        return;
+     }
+
+     const id = Number(tarjetaElegida.dataset.id);
+     const producto = buscarProducto(id);
+
+     detalle.textContent = `${producto.nombre} · ${producto.categoria} · ${producto.precio.toFixed(2)} €/pieza · Quedan ${producto.stock}`;
+     console.log(`${producto.nombre} · ${producto.categoria} · ${producto.precio.toFixed(2)} €/pieza · Quedan ${producto.stock}`);
+});
+
+pagina.addEventListener("keydown", (event)=>{
+    const tecla = event.key === "Escape";
+
+    if(tecla !== null){
+        codigo.textContent = "";
+        aviso.textContent = "";
+        console.log("Escape: código y aviso borrados");
+    }
+
+})
 
 catalogo.addEventListener("click", (event)=>{
 
@@ -96,6 +124,49 @@ function crearLineaTicket(linea){
     return elemento;
 }
 
+function quitarLinea(id){
+    for(let i = 0; i<lineas.length; i++){
+        if(lineas[i].producto.id === id){
+            lineas[i].producto.stock = lineas[i].producto.stock + lineas[i].cantidad;
+            lineas.splice(i,1);
+            return;
+        }
+    }
+}
+
+listaLineas.addEventListener("click", (event)=>{
+    const botonElegido = event.target.closest("button");
+
+    if (botonElegido === null) return;
+
+    const id = Number(botonElegido.closest("li").dataset.id);
+    const linea = buscarLinea(id);
+
+    if(botonElegido.dataset.accion === "mas"){
+
+        if (linea.producto.stock > 0){
+            linea.cantidad++;
+            linea.producto.stock--;
+        }
+        
+    } else if (botonElegido.dataset.accion === "menos"){
+
+        if (linea.cantidad > 1){
+            linea.cantidad--;
+            linea.producto.stock++;
+        } else if(linea.cantidad === 1){
+            quitarLinea(id);
+        }
+        
+    } else{
+        quitarLinea(id);
+    }
+
+    pintarCatalogo();
+    pintarTicket();
+
+});
+
 function buscarProducto(id){
     for (let producto of productos){
         if (id === producto.id){
@@ -117,13 +188,14 @@ function buscarLinea(id) {
 pintarTicket();
 
 function pintarTicket(){
+
     vaciar.disabled = lineas.length === 0;
     listaLineas.replaceChildren();
     let totalPrecio = 0;
     for (let linea of lineas){
-        const lineaTicket = document.createElement("li");
 
-        lineaTicket.textContent = `${linea.producto.nombre} x ${linea.cantidad} · ${(linea.producto.precio * linea.cantidad).toFixed(2)} €`;
+        const lineaTicket = crearLineaTicket(linea);
+
         listaLineas.append(lineaTicket);
         totalPrecio += linea.producto.precio * linea.cantidad;
     }
