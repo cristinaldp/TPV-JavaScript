@@ -32,11 +32,9 @@ let siguienteTicket = 1;
 
 function cumpleFiltro(producto){
 
-    const coincideCategoria = categoriaActual === "todas" ||
-                          producto.categoria === categoriaActual;
+    const coincideCategoria = categoriaActual === "todas" || producto.categoria === categoriaActual; //Esta comprobación es-> o la categoria seleccionada es "todas" o el producto es de la categoría seleccionada.
 
-    const coincideNombre = producto.nombre.toLowerCase()
-                           .includes(campo.value.trim().toLowerCase());
+    const coincideNombre = producto.nombre.toLowerCase().includes(campo.value.trim().toLowerCase()); //Lo que hay escrito en el campo de busqueda coincide con los nombres de los nombres de los productos que aparecen.
 
     if(coincideCategoria && coincideNombre){
         return true;
