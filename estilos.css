@@ -22,6 +22,15 @@ body {
   color: var(--texto);
 }
 
+.oscuro{
+  --fondo: #0a0a0a;
+  --superficie: #2f2e2e;
+  --texto: #a9a8a8;
+  --acento: #82b31f;
+  --aviso: #ce5200;
+  --borde: #3e423a;
+}
+
 .cabecera {
   display: flex;
   justify-content: space-between;

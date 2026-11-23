@@ -26,9 +26,11 @@ const ventas = [];
 const btnCobrar = document.querySelector(".cobrar");
 const resumenVentas = document.querySelector(".resumen-ventas");
 const campo = document.querySelector(".buscar");
+const body = document.querySelector("body");
 let ultimoId = null;
 let categoriaActual = "todas";
 let siguienteTicket = 1;
+let tam = 16;
 
 function cumpleFiltro(producto){
 
@@ -104,7 +106,8 @@ function crearTarjetaProducto(producto) {
   const precio = document.createElement("p");
   precio.textContent = producto.precio.toFixed(2) + " €/kg";
   const stock = document.createElement("p");
-  stock.textContent = `Stock: ${producto.stock}`;
+  let disponible = producto.stock - cantidadEnTicket(producto.id);
+  stock.textContent = `Quedan ${disponible}`;
   tarjeta.append(nombre, codigo, precio, stock);
   const contenedor = document.createElement("div");
   contenedor.classList.add("botones");
@@ -114,10 +117,10 @@ function crearTarjetaProducto(producto) {
   contenedor.append(boton);
   tarjeta.append(contenedor);
 
-  tarjeta.classList.toggle("pocas", producto.stock > 0 && producto.stock <= 3);
+  tarjeta.classList.toggle("pocas", disponible > 0 && disponible <= 3);
 
-  tarjeta.classList.toggle("agotado", producto.stock === 0);
-  boton.disabled = producto.stock === 0;
+  tarjeta.classList.toggle("agotado", disponible === 0);
+  boton.disabled = disponible === 0;
 
   return tarjeta;
 }
@@ -149,8 +152,6 @@ contenedorFiltros.addEventListener("click", (event)=>{
     console.log(`Filtro: ${boton.dataset.categoria}`);
     pintarCatalogo();
 });
-
-pintarCatalogo();
 
 catalogo.addEventListener("click", (event)=>{
      const tarjetaElegida = event.target.closest(".tarjeta");
@@ -188,8 +189,7 @@ catalogo.addEventListener("click", (event)=>{
     if (event.target.closest(".anadir") !== null) {
         // anadirAlTicket(id), escribir el aviso y pintarTicket()
         aviso.textContent = anadirAlTicket(id);
-        pintarCatalogo();
-        pintarTicket();
+        pintar();
     }
   });
 
@@ -222,7 +222,6 @@ function crearLineaTicket(linea){
 function quitarLinea(id){
     for(let i = 0; i<lineas.length; i++){
         if(lineas[i].producto.id === id){
-            lineas[i].producto.stock = lineas[i].producto.stock + lineas[i].cantidad;
             lineas.splice(i,1);
             return;
         }
@@ -239,9 +238,8 @@ listaLineas.addEventListener("click", (event)=>{
 
     if(botonElegido.dataset.accion === "mas"){
 
-        if (linea.producto.stock > 0){
+        if (linea.producto.stock - linea.cantidad > 0){
             linea.cantidad++;
-            linea.producto.stock--;
             ultimoId = linea.producto.id;
         } else {
             aviso.textContent = `${linea.producto.nombre}: solo hay ${linea.cantidad}`;
@@ -253,7 +251,6 @@ listaLineas.addEventListener("click", (event)=>{
 
         if (linea.cantidad > 1){
             linea.cantidad--;
-            linea.producto.stock++;
             ultimoId = linea.producto.id;
         } else if(linea.cantidad === 1){
             quitarLinea(id);
@@ -264,8 +261,7 @@ listaLineas.addEventListener("click", (event)=>{
         aviso.textContent = "";
     }
 
-    pintarCatalogo();
-    pintarTicket();
+    pintar();
 
 });
 
@@ -286,8 +282,6 @@ function buscarLinea(id) {
     }
     return null;
 }
-
-pintarTicket();
 
 function pintarTicket(){
 
@@ -331,8 +325,6 @@ function anadirAlTicket(id) {
         ultimoId = id;
     }
 
-    producto.stock--;
-
     return "";
 }
 
@@ -344,8 +336,7 @@ function venderPorCodigo(event) {
     aviso.textContent = anadirAlTicket(id);
 
     
-    pintarCatalogo();
-    pintarTicket();
+    pintar();
     codigo.value = "";
     codigo.focus();
 }
@@ -353,16 +344,11 @@ function venderPorCodigo(event) {
 ventaCodigo.addEventListener("submit", venderPorCodigo);
 
 function vaciarTicket(){
-
-    for (const linea of lineas) {
-        linea.producto.stock += linea.cantidad;
-    }
     
     lineas = [];
     aviso.textContent = "";
-
-    pintarCatalogo();
-    pintarTicket();
+    ultimoId = null;
+    pintar();
 }
 
 vaciar.addEventListener("click", vaciarTicket);
@@ -370,3 +356,63 @@ vaciar.addEventListener("click", vaciarTicket);
 campo.addEventListener("input", (event)=>{
     pintarCatalogo();
 });
+
+function cantidadEnTicket(id){
+    const linea = buscarLinea(id);
+    if(linea !== null){
+        return linea.cantidad;
+    }
+    return 0;
+}
+
+function pintar() {
+  pintarCatalogo();
+  pintarTicket();
+}
+
+body.addEventListener("click", (event)=>{
+    const tema = event.target.closest(".tema");
+    const tamMenos = event.target.closest(".letra-menos");
+    const tamMas = event.target.closest(".letra-mas");
+
+    if(tema === null && tamMas === null && tamMenos === null){
+        return;
+    }
+
+    if(tema !== null){
+        body.classList.toggle("oscuro");
+        let oscuro = body.classList.contains("oscuro");
+
+        if(oscuro){
+            tema.textContent = "Tema claro";
+            console.log("Tema oscuro: true");
+        } else{
+            tema.textContent = "Tema oscuro";
+            console.log("Tema oscuro: false");
+        }
+    }
+
+    if(tamMas !== null){
+        if (tam < 24){
+            tam +=2;
+            body.style.setProperty("--tam-ticket", `${tam}px`);
+            console.log(`--tam-ticket: ${tam}px`);
+        } else{
+            return;
+        }  
+    }
+
+    if(tamMenos !== null){
+        if (tam > 12){
+            tam -=2;
+            body.style.setProperty("--tam-ticket", `${tam}px`);
+            console.log(`--tam-ticket: ${tam}px`)
+        } else{
+            return;
+        }  
+    }
+
+});
+
+//-----------------------------------------------
+pintar();
