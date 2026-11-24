@@ -71,6 +71,10 @@ function cobrar(){
     console.log(`Cobrado ticket ${siguienteTicket}: ${total.toFixed(2)} €`);
     siguienteTicket++;
 
+    for (const linea of lineas) {
+        linea.producto.stock -= linea.cantidad;
+    }
+
     resumenVentas.textContent = `Tickets: ${ventas.length} · Recaudado: ${recaudacion().toFixed(2)} € · Ticket medio: ${media().toFixed(2)} €`;
 
     lineas = [];
@@ -236,7 +240,7 @@ catalogo.addEventListener("click", (event)=>{
             aviso.textContent = `${producto.nombre} se está editando: no se puede borrar`;
             return;
         }
-        
+
         if(linea === null){
             console.log(`Borrado: ${producto.nombre}`);
             productos.splice(productos.indexOf(producto), 1);
@@ -653,6 +657,10 @@ function comprobarNombre() {
   const nombre = campoNombre.value.trim();
   let mensaje = "";
   if (nombre !== "" && !nombreValido.test(nombre)) mensaje = "Solo letras y espacios";
+
+  if (nombre === "") {
+    mensaje = "El nombre es obligatorio";
+  }
 
   for (let producto of productos){
     if(producto.nombre.toLowerCase() === nombre.toLowerCase() && producto.id !== idEditando) mensaje = "Ya existe un producto con ese nombre";
