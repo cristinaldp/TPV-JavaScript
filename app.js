@@ -32,10 +32,16 @@ const campoNombre = formularioAlta.querySelector(".alta-nombre");
 const campoCategoria = formularioAlta.querySelector(".alta-categoria");
 const campoPrecio = formularioAlta.querySelector(".alta-precio");
 const campoStock = formularioAlta.querySelector(".alta-stock");
+const campoUnidad = formularioAlta.querySelectorAll("input[name='unidad']");
 const casillaOferta = formularioAlta.querySelector(".alta-oferta");
 const contadorSpan = document.querySelector(".contador-nombre");
+const tituloGestion = document.querySelector(".titulo-gestion");
+const botonGuardar = document.querySelector(".guardar");
+const botonCancelar = document.querySelector(".cancelar");
+botonCancelar.hidden = true;
 let contadorNombre = 0;
 let ultimoId = null;
+let idEditando = null;
 let categoriaActual = "todas";
 let siguienteTicket = 1;
 let tam = 16;
@@ -122,7 +128,7 @@ function crearTarjetaProducto(producto) {
   codigo.textContent = `Código ${producto.id}`;
   // ... precio y stock
   const precio = document.createElement("p");
-  precio.textContent = producto.precio.toFixed(2) + " €/kg";
+  precio.textContent = producto.precio.toFixed(2) + " €/" + producto.unidad;
   const stock = document.createElement("p");
 
   let disponible = producto.stock - cantidadEnTicket(producto.id);
@@ -186,8 +192,9 @@ catalogo.addEventListener("click", (event)=>{
      const tarjetaElegida = event.target.closest(".tarjeta");
      const botonAnadir = event.target.closest(".anadir");
      const botonBorrar = event.target.closest(".borrar");
+     const botonEditar = event.target.closest(".editar");
     
-     if (tarjetaElegida === null || botonAnadir !== null || botonBorrar !== null){
+     if (tarjetaElegida === null || botonAnadir !== null || botonBorrar !== null || botonEditar !== null){
         return;
      }
 
@@ -225,13 +232,38 @@ catalogo.addEventListener("click", (event)=>{
     }
 
     if (event.target.closest(".borrar") !== null) {
+        if (id === idEditando) {
+            aviso.textContent = `${producto.nombre} se está editando: no se puede borrar`;
+            return;
+        }
+        
         if(linea === null){
-        console.log(`Borrado: ${producto.nombre}`);
-        productos.splice(productos.indexOf(producto), 1);
-        pintar();
+            console.log(`Borrado: ${producto.nombre}`);
+            productos.splice(productos.indexOf(producto), 1);
+            pintar();
         } else{
             aviso.textContent = `${producto.nombre} está en el ticket: no se puede borrar`;
         }
+    }
+
+    if(event.target.closest(".editar") !== null){
+
+        idEditando = id;
+        tituloGestion.textContent = `Editar: ${producto.nombre}`;
+        botonGuardar.textContent = "Guardar cambios";
+        botonCancelar.hidden = false;
+        campoNombre.value = producto.nombre;
+        contadorSpan.textContent = `${campoNombre.value.length} / 30`;
+        campoCategoria.value = producto.categoria;
+        campoPrecio.value = producto.precio;
+        for(let campo of campoUnidad){
+            campo.checked = campo.value === producto.unidad;
+        }
+        //formularioAlta.querySelector(`input[name='unidad'][value='${producto.unidad}']`).checked = true;
+        campoStock.value = producto.stock;
+        casillaOferta.checked = producto.oferta === true;
+
+        console.log(`Editando ${producto.nombre}(código ${producto.id})`);
     }
   });
 
@@ -456,35 +488,98 @@ body.addEventListener("click", (event)=>{
 
 });
 
-formularioAlta.addEventListener("submit", (event)=>{
-    event.preventDefault();
-    const nombre = campoNombre.value.trim();
-    const categoria = campoCategoria.value;
-    const precio = Number(campoPrecio.value);
-    const unidad = document.querySelector("input[name='unidad']:checked").value;
-    const stock = Number(campoStock.value);
-    const oferta = casillaOferta.checked;
+botonCancelar.addEventListener("click", (event)=>{
+    idEditando = null;
 
-    let validez = validarFormulario();
+    tituloGestion.textContent = "Alta de producto";
+    botonGuardar.textContent = "Dar de alta";
+    botonCancelar.hidden = true;
 
-    if(validez === false){
-        console.log("Alta: el formulario tiene errores");
-        return;
-    }
-
-    let producto = crearProducto(siguienteId, nombre, categoria, precio, unidad, stock);
-
-    producto.oferta = oferta;
-
-    productos.push(producto);
-    siguienteId++;
-
-    console.log(`Alta: ${nombre} (codigo ${producto.id}), ${precio.toFixed(2)} €/${unidad}, stock ${stock}`);
-
-    pintar();
     formularioAlta.reset();
     contadorSpan.textContent = "0 / 30";
+
+    campoNombre.setCustomValidity("");
+
+    mostrarError(campoNombre, errorNombre, "");
+    mostrarError(campoCategoria, errorCategoria, "");
+    mostrarError(campoPrecio, errorPrecio, "");
+    mostrarError(campoStock, errorStock, "");
+
     campoNombre.focus();
+
+    console.log("Edición cancelada");
+})
+
+formularioAlta.addEventListener("submit", (event)=>{
+    event.preventDefault();
+
+    if(idEditando === null){
+        const nombre = campoNombre.value.trim();
+        const categoria = campoCategoria.value;
+        const precio = Number(campoPrecio.value);
+        const unidad = document.querySelector("input[name='unidad']:checked").value;
+        const stock = Number(campoStock.value);
+        const oferta = casillaOferta.checked;
+
+        let validez = validarFormulario();
+
+        if(validez === false){
+            console.log("Alta: el formulario tiene errores");
+            return;
+        }
+
+        let producto = crearProducto(siguienteId, nombre, categoria, precio, unidad, stock);
+
+        producto.oferta = oferta;
+
+        productos.push(producto);
+        siguienteId++;
+
+        console.log(`Alta: ${nombre} (codigo ${producto.id}), ${precio.toFixed(2)} €/${unidad}, stock ${stock}`);
+
+        pintar();
+        formularioAlta.reset();
+        contadorSpan.textContent = "0 / 30";
+        campoNombre.focus();
+    } else {
+        const nombre = campoNombre.value.trim();
+        const categoria = campoCategoria.value;
+        const precio = Number(campoPrecio.value);
+        const unidad = document.querySelector("input[name='unidad']:checked").value;
+        const stock = Number(campoStock.value);
+        const oferta = casillaOferta.checked;
+
+        let validez = validarFormulario();
+
+        if(validez === false){
+            console.log("Alta: el formulario tiene errores");
+            return;
+        }
+
+        const producto = buscarProducto(idEditando);
+
+        producto.nombre = nombre;
+        producto.categoria = categoria;
+        producto.precio = precio;
+        producto.unidad = unidad;
+        producto.stock = stock;
+        producto.oferta = oferta;
+
+        console.log(`Modificado: ${nombre} (codigo ${producto.id}), ${precio.toFixed(2)} €/${unidad}, stock ${stock}`);
+
+        pintar();
+        formularioAlta.reset();
+
+        idEditando = null;
+
+        tituloGestion.textContent = "Alta de producto";
+        botonGuardar.textContent = "Dar de alta";
+        botonCancelar.hidden = true;
+        contadorSpan.textContent = "0 / 30";
+
+        campoNombre.focus();
+    }
+    
 });
 
 campoNombre.addEventListener("input", () => {
@@ -494,6 +589,13 @@ campoNombre.addEventListener("input", () => {
     }
 
     contadorSpan.textContent = `${campoNombre.value.length} / 30`;
+});
+
+campoNombre.addEventListener("blur", ()=>{
+    if (campoNombre.value.trim() !== "") {
+        comprobarNombre();
+        mostrarError(campoNombre, errorNombre, mensajeNombre());
+    }
 });
 
 //VALIDACION Y ERRORES
@@ -553,7 +655,7 @@ function comprobarNombre() {
   if (nombre !== "" && !nombreValido.test(nombre)) mensaje = "Solo letras y espacios";
 
   for (let producto of productos){
-    if(producto.nombre.toLowerCase() === nombre.toLowerCase()) mensaje = "Ya existe un producto con ese nombre";
+    if(producto.nombre.toLowerCase() === nombre.toLowerCase() && producto.id !== idEditando) mensaje = "Ya existe un producto con ese nombre";
   }
 
   campoNombre.setCustomValidity(mensaje);
