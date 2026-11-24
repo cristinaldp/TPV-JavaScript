@@ -47,26 +47,31 @@
     </aside>
   </main>
   <section class="gestion">
-    <h2>Alta de producto</h2>
-    <form class="alta">
-      <label>Nombre <input class="alta-nombre"></label>
+    <h2 class="titulo-gestion">Alta de producto</h2>
+    <form class="alta" novalidate>
+      <label>Nombre <input class="alta-nombre" required minlength="3" maxlength="30"></label>
       <span class="contador-nombre">0 / 30</span>
+      <span class="error error-nombre"></span>
       <label>Categoría
-        <select class="alta-categoria">
+        <select class="alta-categoria" required>
           <option value="">Elige una categoría</option>
           <option value="fruta">Fruta</option>
           <option value="verdura">Verdura</option>
           <option value="frutos secos">Frutos secos</option>
         </select>
       </label>
-      <label>Precio (€) <input class="alta-precio" type="number" step="0.01"></label>
+      <span class="error error-categoria"></span>
+      <label>Precio (€) <input class="alta-precio" type="number" step="0.01" required min="0.1" max="100"></label>
+      <span class="error error-precio"></span>
       <p>Se vende por:
         <label><input type="radio" name="unidad" value="kg" checked> kg</label>
         <label><input type="radio" name="unidad" value="pieza"> pieza</label>
       </p>
-      <label>Stock inicial <input class="alta-stock" type="number" value="0"></label>
+      <label>Stock inicial <input class="alta-stock" type="number" value="0" required min="0" max="999"></label>
+      <span class="error error-stock"></span>
       <label><input type="checkbox" class="alta-oferta"> En oferta</label>
-      <button>Dar de alta</button>
+      <button class="guardar">Dar de alta</button>
+      <button type="button" class="cancelar">Cancelar edición</button>
     </form>
   </section>
   <section class="ventas">

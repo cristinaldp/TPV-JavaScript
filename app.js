@@ -128,6 +128,7 @@ function crearTarjetaProducto(producto) {
   let disponible = producto.stock - cantidadEnTicket(producto.id);
   stock.textContent = `Quedan ${disponible}`;
   tarjeta.append(nombre, codigo, precio, stock);
+
   const contenedor = document.createElement("div");
   contenedor.classList.add("botones");
   const boton = document.createElement("button");
@@ -138,6 +139,11 @@ function crearTarjetaProducto(producto) {
   borrar.classList.add("borrar");
   borrar.textContent = "Borrar";
   contenedor.append(borrar);
+  const editar = document.createElement("button");
+  editar.classList.add("editar");
+  editar.textContent = "Editar";
+  contenedor.append(editar);
+
   tarjeta.append(contenedor);
 
   tarjeta.classList.toggle("pocas", disponible > 0 && disponible <= 3);
@@ -455,13 +461,16 @@ formularioAlta.addEventListener("submit", (event)=>{
     const nombre = campoNombre.value.trim();
     const categoria = campoCategoria.value;
     const precio = Number(campoPrecio.value);
-    if (nombre === "" || categoria === "" || precio <= 0){
-        aviso.textContent = "Alta: faltan el nombre, la categoría o el precio";
-        return;
-    }
     const unidad = document.querySelector("input[name='unidad']:checked").value;
     const stock = Number(campoStock.value);
     const oferta = casillaOferta.checked;
+
+    let validez = validarFormulario();
+
+    if(validez === false){
+        console.log("Alta: el formulario tiene errores");
+        return;
+    }
 
     let producto = crearProducto(siguienteId, nombre, categoria, precio, unidad, stock);
 
@@ -478,15 +487,89 @@ formularioAlta.addEventListener("submit", (event)=>{
     campoNombre.focus();
 });
 
-formularioAlta.addEventListener("input", ()=>{
-    let chars = campoNombre.value.length;
+campoNombre.addEventListener("input", () => {
 
-    if (chars > 30){
-        campoNombre.value = campoNombre.value.slice(0,30);
+    if (campoNombre.value.length > 30) {
+        campoNombre.value = campoNombre.value.slice(0, 30);
     }
 
-    contadorSpan.textContent = `${chars} / 30`;
+    contadorSpan.textContent = `${campoNombre.value.length} / 30`;
 });
+
+//VALIDACION Y ERRORES
+
+function mensajeNombre(){
+    const v = campoNombre.validity;
+
+    if(v.valueMissing) return "El nombre es obligatorio";
+    if(v.tooShort) return "Mínimo 3 caractéres";
+    if(v.customError) return campoNombre.validationMessage;
+
+    return "";
+}
+
+function mensajePrecio() {
+  const v = campoPrecio.validity;
+  if (v.valueMissing) return "El precio es obligatorio";
+  if (v.rangeUnderflow || v.rangeOverflow) return "Entre 0.10 y 100 €";
+  if (v.stepMismatch) return "Como mucho dos decimales";
+
+  return "";
+}
+
+function mensajeCategoria(){
+    if(campoCategoria.value === ""){
+        return "Elige una categoría"
+    }
+
+    return "";
+}
+
+function mensajeStock(){
+
+    const v = campoStock.validity;
+
+    if(v.valueMissing || v.rangeOverflow || v.rangeUnderflow){
+        return "El Stock es obligatorio (puede ser 0), un número entre 0 y 999";
+    }
+
+    return "";
+}
+
+function mostrarError(campo, zona, mensaje){
+    zona.textContent = mensaje; // "" si no hay error
+    campo.classList.toggle("invalido", mensaje !== "");
+}
+
+const errorNombre = document.querySelector(".error-nombre");
+const errorCategoria = document.querySelector(".error-categoria");
+const errorPrecio = document.querySelector(".error-precio");
+const errorStock = document.querySelector(".error-stock");
+const nombreValido = /^[A-Za-zÁÉÍÓÚáéíóúÑñÜü ]{3,30}$/;
+
+function comprobarNombre() {
+  const nombre = campoNombre.value.trim();
+  let mensaje = "";
+  if (nombre !== "" && !nombreValido.test(nombre)) mensaje = "Solo letras y espacios";
+
+  for (let producto of productos){
+    if(producto.nombre.toLowerCase() === nombre.toLowerCase()) mensaje = "Ya existe un producto con ese nombre";
+  }
+
+  campoNombre.setCustomValidity(mensaje);
+}
+
+function validarFormulario(){
+
+    comprobarNombre();
+
+    mostrarError(campoNombre, errorNombre, mensajeNombre());
+    mostrarError(campoCategoria, errorCategoria, mensajeCategoria());
+    mostrarError(campoPrecio, errorPrecio, mensajePrecio());
+    mostrarError(campoStock, errorStock, mensajeStock());
+
+    return formularioAlta.checkValidity();
+}
 
 //-----------------------------------------------
 pintar();
