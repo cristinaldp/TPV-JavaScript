@@ -46,6 +46,29 @@
       <button class="vaciar">Vaciar ticket</button>
     </aside>
   </main>
+  <section class="gestion">
+    <h2>Alta de producto</h2>
+    <form class="alta">
+      <label>Nombre <input class="alta-nombre"></label>
+      <span class="contador-nombre">0 / 30</span>
+      <label>Categoría
+        <select class="alta-categoria">
+          <option value="">Elige una categoría</option>
+          <option value="fruta">Fruta</option>
+          <option value="verdura">Verdura</option>
+          <option value="frutos secos">Frutos secos</option>
+        </select>
+      </label>
+      <label>Precio (€) <input class="alta-precio" type="number" step="0.01"></label>
+      <p>Se vende por:
+        <label><input type="radio" name="unidad" value="kg" checked> kg</label>
+        <label><input type="radio" name="unidad" value="pieza"> pieza</label>
+      </p>
+      <label>Stock inicial <input class="alta-stock" type="number" value="0"></label>
+      <label><input type="checkbox" class="alta-oferta"> En oferta</label>
+      <button>Dar de alta</button>
+    </form>
+  </section>
   <section class="ventas">
     <h2>Ventas del día</h2>
     <p class="resumen-ventas">Sin ventas todavía</p>

@@ -27,18 +27,28 @@ const btnCobrar = document.querySelector(".cobrar");
 const resumenVentas = document.querySelector(".resumen-ventas");
 const campo = document.querySelector(".buscar");
 const body = document.querySelector("body");
+const formularioAlta = document.querySelector(".alta");
+const campoNombre = formularioAlta.querySelector(".alta-nombre");
+const campoCategoria = formularioAlta.querySelector(".alta-categoria");
+const campoPrecio = formularioAlta.querySelector(".alta-precio");
+const campoStock = formularioAlta.querySelector(".alta-stock");
+const casillaOferta = formularioAlta.querySelector(".alta-oferta");
+const contadorSpan = document.querySelector(".contador-nombre");
+let contadorNombre = 0;
 let ultimoId = null;
 let categoriaActual = "todas";
 let siguienteTicket = 1;
 let tam = 16;
+let siguienteId = 1; //En cada carga igualo siguienteId al número más alto disponible
+for (const producto of productos) {
+  if (producto.id >= siguienteId) siguienteId = producto.id + 1;
+}
 
 function cumpleFiltro(producto){
 
-    const coincideCategoria = categoriaActual === "todas" ||
-                          producto.categoria === categoriaActual;
+    const coincideCategoria = categoriaActual === "todas" || producto.categoria === categoriaActual;
 
-    const coincideNombre = producto.nombre.toLowerCase()
-                           .includes(campo.value.trim().toLowerCase());
+    const coincideNombre = producto.nombre.toLowerCase().includes(campo.value.trim().toLowerCase());
 
     if(coincideCategoria && coincideNombre){
         return true;
@@ -100,12 +110,21 @@ function crearTarjetaProducto(producto) {
   tarjeta.dataset.id = producto.id;
   const nombre = document.createElement("h3");
   nombre.textContent = producto.nombre;
+  
+  if(producto.oferta === true){
+    const oferta = document.createElement("span");
+    oferta.classList.add("etiqueta-oferta");
+    oferta.textContent = "OFERTA";
+    nombre.append(oferta);
+  }
+
   const codigo = document.createElement("p");
   codigo.textContent = `Código ${producto.id}`;
   // ... precio y stock
   const precio = document.createElement("p");
   precio.textContent = producto.precio.toFixed(2) + " €/kg";
   const stock = document.createElement("p");
+
   let disponible = producto.stock - cantidadEnTicket(producto.id);
   stock.textContent = `Quedan ${disponible}`;
   tarjeta.append(nombre, codigo, precio, stock);
@@ -115,6 +134,10 @@ function crearTarjetaProducto(producto) {
   boton.classList.add("anadir");
   boton.textContent="Añadir";
   contenedor.append(boton);
+  const borrar = document.createElement("button");
+  borrar.classList.add("borrar");
+  borrar.textContent = "Borrar";
+  contenedor.append(borrar);
   tarjeta.append(contenedor);
 
   tarjeta.classList.toggle("pocas", disponible > 0 && disponible <= 3);
@@ -156,8 +179,9 @@ contenedorFiltros.addEventListener("click", (event)=>{
 catalogo.addEventListener("click", (event)=>{
      const tarjetaElegida = event.target.closest(".tarjeta");
      const botonAnadir = event.target.closest(".anadir");
-
-     if (tarjetaElegida === null || botonAnadir !== null){
+     const botonBorrar = event.target.closest(".borrar");
+    
+     if (tarjetaElegida === null || botonAnadir !== null || botonBorrar !== null){
         return;
      }
 
@@ -185,11 +209,23 @@ catalogo.addEventListener("click", (event)=>{
     if (tarjetaElegida === null) return; // clic en un hueco
 
     const id = Number(tarjetaElegida.dataset.id);// dataset devuelve texto
+    const producto = buscarProducto(id);
+    const linea = buscarLinea(id);
 
     if (event.target.closest(".anadir") !== null) {
         // anadirAlTicket(id), escribir el aviso y pintarTicket()
         aviso.textContent = anadirAlTicket(id);
         pintar();
+    }
+
+    if (event.target.closest(".borrar") !== null) {
+        if(linea === null){
+        console.log(`Borrado: ${producto.nombre}`);
+        productos.splice(productos.indexOf(producto), 1);
+        pintar();
+        } else{
+            aviso.textContent = `${producto.nombre} está en el ticket: no se puede borrar`;
+        }
     }
   });
 
@@ -412,6 +448,44 @@ body.addEventListener("click", (event)=>{
         }  
     }
 
+});
+
+formularioAlta.addEventListener("submit", (event)=>{
+    event.preventDefault();
+    const nombre = campoNombre.value.trim();
+    const categoria = campoCategoria.value;
+    const precio = Number(campoPrecio.value);
+    if (nombre === "" || categoria === "" || precio <= 0){
+        aviso.textContent = "Alta: faltan el nombre, la categoría o el precio";
+        return;
+    }
+    const unidad = document.querySelector("input[name='unidad']:checked").value;
+    const stock = Number(campoStock.value);
+    const oferta = casillaOferta.checked;
+
+    let producto = crearProducto(siguienteId, nombre, categoria, precio, unidad, stock);
+
+    producto.oferta = oferta;
+
+    productos.push(producto);
+    siguienteId++;
+
+    console.log(`Alta: ${nombre} (codigo ${producto.id}), ${precio.toFixed(2)} €/${unidad}, stock ${stock}`);
+
+    pintar();
+    formularioAlta.reset();
+    contadorSpan.textContent = "0 / 30";
+    campoNombre.focus();
+});
+
+formularioAlta.addEventListener("input", ()=>{
+    let chars = campoNombre.value.length;
+
+    if (chars > 30){
+        campoNombre.value = campoNombre.value.slice(0,30);
+    }
+
+    contadorSpan.textContent = `${chars} / 30`;
 });
 
 //-----------------------------------------------
